@@ -54,6 +54,9 @@
                 <version>3.3.1</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <configuration>
+                          <outputDirectory>${project.build.directory}</outputDirectory>
+                    </configuration>
                 </configuration>
             </plugin>
 
