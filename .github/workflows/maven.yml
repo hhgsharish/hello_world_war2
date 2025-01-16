@@ -38,3 +38,23 @@ jobs:
       - name: Run Unit Tests with Maven
         run: mvn test
         if: ${{ success() }}  # Run this step only if the previous build step succeeded
+
+  # Sequential Jobs: SonarQube Analysis and Artifact Upload
+  sonar_analysis:
+    # This job will also run on the self-hosted runner with the "staging" label.
+    # Ensure the staging runner has the "staging" label.
+    runs-on: [self-hosted, staging]  # Self-hosted EC2 with Tomcat installed (Staging)
+    needs: build_and_test
+    if: ${{ needs.build_and_test.result == 'success' }}  # Run only if build and test succeed
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run SonarQube analysis
+        run: |
+          mvn clean verify sonar:sonar \
+            -Dsonar.organization=hhgsharish \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.projectKey=hhgsharish_hello_world_war2 \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
