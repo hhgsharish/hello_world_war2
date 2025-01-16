@@ -9,12 +9,12 @@ on:
     branches:
       - master
       - 'feature/*'
-  workflow_dispatch:
-    inputs:
-      deploy:
-        description: 'Trigger deploy to production'
-        required: true
-        default: 'true'
+  #workflow_dispatch:
+  #  inputs:
+  #    deploy:
+  #      description: 'Trigger deploy to production'
+  #      required: true
+  #      default: 'true'
 
 jobs:
   # Parallel Job: Build and Test on Self-Hosted EC2 (with Tomcat installed )
@@ -71,6 +71,7 @@ jobs:
       - name: Upload Artifact to JFrog Artifactory
         run: |
           echo "Uploading artifact to JFrog Artifactory..."
+          chmod -R 777 target/
           curl -u "admin:${{ secrets.JFROG_TOKEN }}" \
           -T target/my-helloworld-1.0-snapshot.war \
           "http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/my-helloworld-1.0-snapshot2.war"
