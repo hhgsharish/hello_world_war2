@@ -38,6 +38,26 @@ jobs:
       - name: Run Unit Tests with Maven
         run: mvn test
         #if: ${{ success() }}  # Run this step only if the previous build step succeeded
+        
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys:
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          echo "<settings>
+                  <servers>
+                    <server>
+                      <id>akshatha-helloworld</id>
+                      <username>${{ secrets.JFROG_USERNAME }}</username>
+                      <password>${{ secrets.JFROG_TOKEN }}</password>
+                    </server>
+                  </servers>
+                </settings>" > ~/.m2/settings.xml
 
   # Sequential Jobs: SonarQube Analysis and Artifact Upload
   sonar_analysis:
