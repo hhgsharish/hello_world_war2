@@ -1,4 +1,4 @@
-name: Java CI with Maven, SonarQube, and Production Deployment
+name: Java CI with Maven, SonarQube, and Production Deployment.
 
 on:
   push:
