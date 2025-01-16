@@ -83,4 +83,38 @@ jobs:
                 </settings>" > ~/.m2/settings.xml
 
            mvn clean deploy   
+  deploy:
+    # This job will deploy to both staging and production environments based on the matrix configuration.
+    # The staging environment will use the self-hosted runner with the "staging" label.
+    # The production environment will use the self-hosted runner with the "production" label.
+    strategy:
+      matrix:
+        node: [staging, prod]
+    runs-on: ${{ matrix.node }} # Use dynamic environment (staging or production)
+    needs: [sonar_analysis, upload_artifact]  # Waits for SonarQube and Artifactory jobs to complete
+      # Deploy to both staging and production environments
+    steps:
+      #- name: Checkout code
+      #  uses: actions/checkout@v2
 
+      - name: Deploy to Tomcat (Staging/Production)
+        run: |
+          echo "Deploying to ${{ matrix.node }}..."
+
+          # Deploy artifact to the appropriate Tomcat server based on the environment
+          if [ "${{ matrix.node }}" == "staging" ]; then
+            pwd
+            cd /opt/apache-tomcat-10.1.34/webapps/
+            curl -L -u "${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_TOKEN }}" -O "http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/com/example/my-helloworld/1.0-SNAPSHOT/my-helloworld-1.0-20250116.162120-1.war"
+            
+          elif [ "${{ matrix.node }}" == "production" ]; then
+           # sudo chown -R ubuntu:ubuntu /opt
+            cd /opt/apache-tomcat-10.1.34/webapps/
+            curl -L -u "${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_TOKEN }}" -O "http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/com/example/my-helloworld/1.0-SNAPSHOT/my-helloworld-1.0-20250116.162120-1.war"
+             
+          else
+              echo "Skipping production deployment:Node is not matching"
+          fi
+        if: ${{ needs.upload_artifact.result == 'success' }}  # Deploy only if the artifact upload was successful
+
+  # Conditional Job: Trigger Deploy Only if Deploy Input is True (Manual Trigger )
