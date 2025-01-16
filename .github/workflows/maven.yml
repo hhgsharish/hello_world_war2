@@ -58,3 +58,18 @@ jobs:
             -Dsonar.projectKey=hhgsharish_hello_world_war2 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
+  upload_artifact:
+    # This job will also run on the self-hosted runner with the "staging" label.
+    # Ensure the staging runner has the "staging" label.
+    runs-on: [self-hosted, staging]  # Self-hosted EC2 with Tomcat installed (Staging)
+    needs: build_and_test
+    if: ${{ needs.build_and_test.result == 'success' }}  # Run only if build and test succeed
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Upload Artifact to JFrog Artifactory
+        run: |
+          echo "Uploading artifact to JFrog Artifactory..."
+          curl -u "admin:${{ secrets.JFROG_TOKEN }}" -T /home/ubuntu/.m2/repository/com/example/my-helloworld/1.0-snapshot/my-helloworld-1.0-snapshot.war "http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/my-helloworld-1.0-snapshot2.war"
+  # Matrix Job: Deployment to Staging and Production (Self-Hosted EC2 with Tomcat installed)
