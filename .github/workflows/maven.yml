@@ -11,10 +11,10 @@ on:
       - 'feature/*'
   workflow_dispatch:
     inputs:
-    deploy:
-    description: 'Trigger deploy to production'
-    required: true
-    default: 'true'
+      deploy:
+        description: 'Trigger deploy to production'
+        required: true
+        default: 'false'
 
 jobs:
   # Parallel Job: Build and Test on Self-Hosted EC2 (with Tomcat installed )
@@ -23,8 +23,8 @@ jobs:
     # Ensure your self-hosted runner for staging has the label `staging` assigned to it.
     runs-on: [self-hosted, staging]  # Self-hosted EC2 with Tomcat installed (Staging)
     steps:
-      #- name: Checkout code
-      #  uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Run Environment Setup Script (env-setup.sh)
         run: |
@@ -65,13 +65,13 @@ jobs:
     needs: build_and_test
     if: ${{ needs.build_and_test.result == 'success' }}  # Run only if build and test succeed
     steps:
-      #- name: Checkout code
+       #- name: Checkout code
        # uses: actions/checkout@v2
 
       - name: Upload Artifact to JFrog Artifactory
         run: |
           echo "Uploading artifact to JFrog Artifactory..."
-          chmod -R 777 target/
+          #chmod -R 777 target/
           curl -u "admin:${{ secrets.JFROG_TOKEN }}" \
           -T target/my-helloworld-1.0-snapshot.war \
           "http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/my-helloworld-1.0-snapshot2.war"
