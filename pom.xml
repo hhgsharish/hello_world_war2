@@ -13,6 +13,14 @@
        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
        <sonar.projectKey>hhgsharish_hello_world_war2</sonar.projectKey>
    </properties>
+  <distributionManagement>
+     <repository>
+        <id>hello-world-war-libs-snapshot</id>
+        <name>hello-world-war-libs-snapshot</name>
+        <url>http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/</url>
+     </repository>
+  </distributionManagement>
+         
     <dependencies>
         <!-- Servlet API Dependency -->
         <dependency>
@@ -54,9 +62,6 @@
                 <version>3.3.1</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <configuration>
-                          <outputDirectory>${project.build.directory}</outputDirectory>
-                    </configuration>
                 </configuration>
             </plugin>
 
