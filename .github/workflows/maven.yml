@@ -14,7 +14,7 @@ on:
       deploy:
         description: 'Trigger deploy to production'
         required: true
-        default: 'false'
+        default: 'true'
 
 jobs:
   # Parallel Job: Build and Test on Self-Hosted EC2 (with Tomcat installed )
@@ -32,12 +32,12 @@ jobs:
           ./env-setup.sh  # This sets up Java, Maven, etc.
 
       - name: Build with Maven
-        run: mvn clean install
-        if: ${{ github.event_name != 'pull_request' }}  # Only run on push events, skip for PR
+        run: mvn clean install -DskipTests
+        #if: ${{ github.event_name != 'pull_request' }}  # Only run on push events, skip for PR
 
       - name: Run Unit Tests with Maven
         run: mvn test
-        if: ${{ success() }}  # Run this step only if the previous build step succeeded
+        #if: ${{ success() }}  # Run this step only if the previous build step succeeded
 
   # Sequential Jobs: SonarQube Analysis and Artifact Upload
   sonar_analysis:
@@ -71,5 +71,7 @@ jobs:
       - name: Upload Artifact to JFrog Artifactory
         run: |
           echo "Uploading artifact to JFrog Artifactory..."
-          curl -u "admin:${{ secrets.JFROG_TOKEN }}" -T target/my-helloworld-1.0-snapshot.war "http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/my-helloworld-1.0-snapshot2.war"
+          curl -u "admin:${{ secrets.JFROG_TOKEN }}" \
+          -T target/my-helloworld-1.0-snapshot.war \
+          "http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/my-helloworld-1.0-snapshot2.war"
   # Matrix Job: Deployment to Staging and Production (Self-Hosted EC2 with Tomcat installed)
