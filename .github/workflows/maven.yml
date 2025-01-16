@@ -39,26 +39,6 @@ jobs:
         run: mvn test
         #if: ${{ success() }}  # Run this step only if the previous build step succeeded
         
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys:
-
-      - name: Configure Maven settings
-        run: |
-          mkdir -p ~/.m2
-          echo "<settings>
-                  <servers>
-                    <server>
-                      <id>akshatha-helloworld</id>
-                      <username>${{ secrets.JFROG_USERNAME }}</username>
-                      <password>${{ secrets.JFROG_TOKEN }}</password>
-                    </server>
-                  </servers>
-                </settings>" > ~/.m2/settings.xml
-
   # Sequential Jobs: SonarQube Analysis and Artifact Upload
   sonar_analysis:
     # This job will also run on the self-hosted runner with the "staging" label.
@@ -77,7 +57,7 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.projectKey=hhgsharish_hello_world_war2 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
+            
   upload_artifact:
     # This job will also run on the self-hosted runner with the "staging" label.
     # Ensure the staging runner has the "staging" label.
@@ -85,14 +65,22 @@ jobs:
     needs: build_and_test
     if: ${{ needs.build_and_test.result == 'success' }}  # Run only if build and test succeed
     steps:
-       #- name: Checkout code
-       # uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Upload Artifact to JFrog Artifactory
+      - name: Configure Maven settings
         run: |
           echo "Uploading artifact to JFrog Artifactory..."
-          chmod +r target/my-helloworld-1.0-snapshot.war
-          curl -u "admin:${{ secrets.JFROG_TOKEN }}" \
-          -T target/my-helloworld-1.0-snapshot.war \
-          "http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/my-helloworld-1.0-snapshot2.war"
-  # Matrix Job: Deployment to Staging and Production (Self-Hosted EC2 with Tomcat installed)
+          mkdir -p ~/.m2
+          echo "<settings>
+                  <servers>
+                    <server>
+                      <id>hello-world-war-libs-snapshot</id>
+                      <username>${{ secrets.JFROG_USERNAME }}</username>
+                      <password>${{ secrets.JFROG_TOKEN }}</password>
+                    </server>
+                  </servers>
+                </settings>" > ~/.m2/settings.xml
+
+           mvn clean deploy   
+
