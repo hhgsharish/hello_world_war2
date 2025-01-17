@@ -17,7 +17,7 @@
      <repository>
         <id>hello-world-war-libs-snapshot</id>
         <name>hello-world-war-libs-snapshot</name>
-        <url>http://65.2.124.189:8082/artifactory/hello-world-war-libs-snapshot/</url>
+        <url>http://13.127.204.172:8082/artifactory/hello-world-war-libs-snapshot/</url>
      </repository>
   </distributionManagement>
          
